@@ -18,16 +18,30 @@ export async function POST(req: NextRequest) {
     //     getLinkedinSignals(email),
     //   ])
 
-    // Demo mode
-    const contact = mockContacts.find(c => c.email === email)
+    const isDemoMode = typeof global.DEMO_MODE !== 'undefined' ? global.DEMO_MODE : process.env.DEMO_MODE !== 'false';
+
+    let contact, threads, meetings;
+
+    if (!isDemoMode) {
+      const { getContact, getEmailThreads, getUpcomingMeetings } = require('@/lib/db');
+      contact = await getContact(email);
+      threads = await getEmailThreads(email, 5);
+      meetings = await getUpcomingMeetings(email);
+      if (contact && typeof contact.tags === 'string') {
+        contact.tags = JSON.parse(contact.tags);
+      }
+    } else {
+      // Demo mode
+      contact = mockContacts.find(c => c.email === email)
+      threads = mockGmailThreads[email] || []
+      meetings = mockCalendarEvents.filter(e =>
+        e.attendees.some(a => a.email === email)
+      )
+    }
+
     if (!contact) {
       return NextResponse.json({ error: 'Contact not found' }, { status: 404 })
     }
-
-    const threads = mockGmailThreads[email] || []
-    const meetings = mockCalendarEvents.filter(e =>
-      e.attendees.some(a => a.email === email)
-    )
 
     // Build prompt for Claude
     const systemPrompt = `You are a personal relationship intelligence assistant. Be warm, specific, and concise. Never say "based on the data provided." Speak as if you genuinely know this person's network.`

@@ -1,6 +1,7 @@
 // POST /api/query — Runs custom SQL queries (with mock evaluator for DEMO_MODE)
 import { NextResponse } from 'next/server'
 import { mockContacts, mockCalendarEvents } from '@/lib/mock-data'
+import { queryDb } from '@/lib/db'
 
 export async function POST(request: Request) {
   try {
@@ -15,8 +16,32 @@ export async function POST(request: Request) {
     const isQuick = cleanSql.includes('LIMIT') || cleanSql.includes('COUNT')
     const cacheHit = Math.random() > 0.4 // 60% chance of cache HIT on requests
     const baseTime = cacheHit ? 2 : (isQuick ? 15 : 45)
-    const durationMs = baseTime + Math.floor(Math.random() * 8)
     
+    const isDemoMode = typeof global.DEMO_MODE !== 'undefined' ? global.DEMO_MODE : process.env.DEMO_MODE !== 'false';
+
+    // Route metadata queries to the ACTUAL coral.exe binary!
+    if (!isDemoMode && cleanSql.includes('CORAL.')) {
+      try {
+        const { execSync } = require('child_process');
+        const start = Date.now();
+        // Execute the real Coral CLI binary downloaded in the project
+        const result = execSync(`coral.exe sql --format json "${sql.replace(/"/g, '\\"')}"`);
+        const rows = JSON.parse(result.toString());
+        return NextResponse.json({ rows, durationMs: Date.now() - start, cacheHit: false });
+      } catch (err) {
+        console.error('Real Coral CLI execution failed:', err);
+        // Fall back to mock if coral.exe fails (e.g., syntax error)
+      }
+    }
+
+    if (!isDemoMode && !cleanSql.includes('CORAL.')) {
+      const start = Date.now()
+      const rows = queryDb(sql)
+      const durationMs = Date.now() - start
+      return NextResponse.json({ rows, durationMs, cacheHit: false })
+    }
+
+    const durationMs = baseTime + Math.floor(Math.random() * 8)
     let rows: Record<string, any>[] = []
     
     if (cleanSql.includes('FROM CORAL.TABLES')) {

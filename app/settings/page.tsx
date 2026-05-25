@@ -335,6 +335,33 @@ function SourceCard({ source }: { source: DataSource }) {
 export default function SettingsPage() {
   const [logs, setLogs] = useState<string[]>([])
   const [testing, setTesting] = useState(false)
+  const [demoMode, setDemoMode] = useState(true)
+  const [loadingMode, setLoadingMode] = useState(true)
+
+  // Fetch initial mode
+  require('react').useEffect(() => {
+    fetch('/api/mode')
+      .then(res => res.json())
+      .then(data => {
+        if (typeof data.demoMode === 'boolean') {
+          setDemoMode(data.demoMode)
+        }
+        setLoadingMode(false)
+      })
+      .catch(() => setLoadingMode(false))
+  }, [])
+
+  const toggleMode = async () => {
+    const nextMode = !demoMode
+    setDemoMode(nextMode)
+    await fetch('/api/mode', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ demoMode: nextMode })
+    })
+    // Force reload to apply mode across the app
+    window.location.reload()
+  }
 
   const runMcpDiagnostics = () => {
     setTesting(true)
@@ -401,16 +428,57 @@ export default function SettingsPage() {
       <main style={{ maxWidth: 800, margin: '0 auto', padding: '32px 24px' }}>
         {/* Header */}
         <div className="animate-fade-in-up" style={{ marginBottom: 32 }}>
-          <h1 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>
-            Data Sources
-          </h1>
-          <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.7, maxWidth: 600 }}>
-            Connect your platforms to Coral&apos;s SQL engine. Each source is ingested via MCP connectors and joined into a unified <code style={{
-              fontSize: 12, padding: '2px 6px', borderRadius: 4,
-              background: 'rgba(250,204,21,0.1)', color: 'var(--accent-gold)',
-              fontFamily: "'JetBrains Mono', monospace",
-            }}>contact_relationship_graph</code> view.
-          </p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div>
+              <h1 style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>
+                Data Sources
+              </h1>
+              <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.7, maxWidth: 600 }}>
+                Connect your platforms to Coral&apos;s SQL engine. Each source is ingested via MCP connectors and joined into a unified <code style={{
+                  fontSize: 12, padding: '2px 6px', borderRadius: 4,
+                  background: 'rgba(250,204,21,0.1)', color: 'var(--accent-gold)',
+                  fontFamily: "'JetBrains Mono', monospace",
+                }}>contact_relationship_graph</code> view.
+              </p>
+            </div>
+            
+            {/* Mode Toggle */}
+            {!loadingMode && (
+              <div style={{
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: 'var(--radius-lg)',
+                padding: '12px 16px',
+                display: 'flex', alignItems: 'center', gap: 16
+              }}>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                    Mode: {demoMode ? 'Demo (Mock Data)' : 'Live (SQLite + AI)'}
+                    <span style={{ 
+                      width: 8, height: 8, borderRadius: '50%', 
+                      background: demoMode ? '#facc15' : '#4ade80',
+                      boxShadow: `0 0 8px ${demoMode ? '#facc15' : '#4ade80'}`
+                    }} />
+                  </div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
+                    {demoMode ? 'Fast, mock data for instant demoing' : 'Real SQL queries hitting SQLite DB'}
+                  </div>
+                </div>
+                <button 
+                  onClick={toggleMode}
+                  style={{
+                    background: demoMode ? 'var(--accent-blue)' : 'var(--text-primary)',
+                    color: demoMode ? 'white' : '#000',
+                    border: 'none', borderRadius: 'var(--radius-full)',
+                    padding: '8px 16px', fontSize: 12, fontWeight: 600,
+                    cursor: 'pointer', transition: 'all 0.2s'
+                  }}
+                >
+                  Switch to {demoMode ? 'Live' : 'Demo'}
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Architecture diagram */}

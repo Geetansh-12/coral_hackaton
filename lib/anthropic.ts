@@ -1,11 +1,12 @@
 // ============================================================
-// Anthropic Claude API — AI Agent wrapper
-// Used for chat, pre-meeting briefs, and daily digests
+// AI Provider — Unified wrapper for Gemini (free) + Anthropic (paid)
+// Priority: Gemini → Anthropic → Mock responses
 // ============================================================
 
 import Anthropic from '@anthropic-ai/sdk'
+import { generateGeminiBrief, streamGeminiChat, isGeminiAvailable } from '@/lib/gemini'
 
-const getClient = () => {
+const getAnthropicClient = () => {
   const apiKey = process.env.ANTHROPIC_API_KEY
   if (!apiKey || apiKey === 'sk-ant-...') {
     return null
@@ -15,19 +16,29 @@ const getClient = () => {
 
 /** Generate a one-shot response (for briefs, digests) */
 export async function generateBrief(systemPrompt: string, userPrompt: string): Promise<string> {
-  const client = getClient()
-  if (!client) {
-    return generateMockBrief(userPrompt)
+  // Try Gemini first (free tier)
+  if (isGeminiAvailable()) {
+    console.log('[AI] Using Gemini for brief generation')
+    const result = await generateGeminiBrief(systemPrompt, userPrompt)
+    if (result) return result
   }
 
-  const message = await client.messages.create({
-    model: 'claude-sonnet-4-20250514',
-    max_tokens: 1024,
-    system: systemPrompt,
-    messages: [{ role: 'user', content: userPrompt }],
-  })
+  // Try Anthropic as fallback (paid)
+  const client = getAnthropicClient()
+  if (client) {
+    console.log('[AI] Using Anthropic for brief generation')
+    const message = await client.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1024,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userPrompt }],
+    })
+    return message.content[0].type === 'text' ? message.content[0].text : ''
+  }
 
-  return message.content[0].type === 'text' ? message.content[0].text : ''
+  // Fall back to mock
+  console.log('[AI] Using mock brief (no API keys configured)')
+  return generateMockBrief(userPrompt)
 }
 
 /** Streaming chat — yields text chunks for real-time UI */
@@ -35,28 +46,48 @@ export async function* streamChat(
   systemPrompt: string,
   messages: { role: 'user' | 'assistant'; content: string }[]
 ): AsyncGenerator<string> {
-  const client = getClient()
-  if (!client) {
-    // Mock streaming for demo
-    yield* mockStreamResponse(messages[messages.length - 1]?.content || '', systemPrompt)
+  // Try Gemini first (free tier)
+  if (isGeminiAvailable()) {
+    console.log('[AI] Using Gemini for streaming chat')
+    let hasYielded = false
+    try {
+      for await (const chunk of streamGeminiChat(systemPrompt, messages)) {
+        if (chunk) {
+          hasYielded = true
+          yield chunk
+        }
+      }
+      if (hasYielded) return
+    } catch (err) {
+      console.error('[AI] Gemini streaming failed, falling back:', err)
+    }
+  }
+
+  // Try Anthropic as fallback (paid)
+  const client = getAnthropicClient()
+  if (client) {
+    console.log('[AI] Using Anthropic for streaming chat')
+    const stream = client.messages.stream({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1024,
+      system: systemPrompt,
+      messages,
+    })
+
+    for await (const chunk of stream) {
+      if (
+        chunk.type === 'content_block_delta' &&
+        chunk.delta.type === 'text_delta'
+      ) {
+        yield chunk.delta.text
+      }
+    }
     return
   }
 
-  const stream = client.messages.stream({
-    model: 'claude-sonnet-4-20250514',
-    max_tokens: 1024,
-    system: systemPrompt,
-    messages,
-  })
-
-  for await (const chunk of stream) {
-    if (
-      chunk.type === 'content_block_delta' &&
-      chunk.delta.type === 'text_delta'
-    ) {
-      yield chunk.delta.text
-    }
-  }
+  // Fall back to mock streaming
+  console.log('[AI] Using mock streaming (no API keys configured)')
+  yield* mockStreamResponse(messages[messages.length - 1]?.content || '', systemPrompt)
 }
 
 // ---------- Mock responses for demo mode ----------
@@ -134,7 +165,7 @@ async function* mockStreamResponse(question: string, systemPrompt = ''): AsyncGe
       response = `${contact.name} is ${contact.role} at ${contact.company}. Relationship type: ${contact.relationship}. Health score: ${contact.score}, with ${contact.days} days since your last touchpoint.\n\nWhat matters: ${contact.notes || 'No personal note is saved yet.'}\n\n${hasSignal ? `Recent signal: ${contact.signals}.\n\nBest next move: send a timely congratulations note and ask what they are building next.` : `Best next move: send a short reconnect note anchored in their ${contact.tags || 'current'} context.`}`
     }
   } else if (question.toLowerCase().includes("haven't") || question.toLowerCase().includes('while')) {
-    response = `Looking at your network, here are the relationships that need some attention:\n\n**🔴 Going cold (60+ days)**\n- **Sarah Chen** (Stripe, VP Engineering) — 72 days. You used to chat monthly. She recently got promoted, perfect excuse to reconnect.\n- **David Park** (Notion, PM Lead) — 65 days. Last email was about the API integration project.\n- **Rachel Kim** (a]16z, Partner) — 89 days. She introduced you to two portfolio companies last year.\n\n**🟡 Starting to fade (30-60 days)**\n- **James Liu** (Google, Staff SWE) — 45 days. You had coffee plans that fell through.\n- **Maya Johnson** (Linear, Head of Design) — 38 days. Great rapport from the design systems conversation.\n\nI'd prioritize Sarah and Rachel — both are high-value relationships where a quick message would go a long way. Want me to draft something?`
+    response = `Looking at your network, here are the relationships that need some attention:\n\n**🔴 Going cold (60+ days)**\n- **Sarah Chen** (Stripe, VP Engineering) — 72 days. You used to chat monthly. She recently got promoted, perfect excuse to reconnect.\n- **David Park** (Notion, PM Lead) — 65 days. Last email was about the API integration project.\n- **Rachel Kim** (a16z, Partner) — 89 days. She introduced you to two portfolio companies last year.\n\n**🟡 Starting to fade (30-60 days)**\n- **James Liu** (Google, Staff SWE) — 45 days. You had coffee plans that fell through.\n- **Maya Johnson** (Linear, Head of Design) — 38 days. Great rapport from the design systems conversation.\n\nI'd prioritize Sarah and Rachel — both are high-value relationships where a quick message would go a long way. Want me to draft something?`
   } else if (question.toLowerCase().includes('reach out') || question.toLowerCase().includes('today')) {
     response = `Here's who I'd reach out to today, based on timing and opportunity:\n\n**1. Alex Kim** — Just changed jobs to Anthropic (3 days ago). A "congrats on the new role" message now will feel genuine, not performative. You worked together for 2 years.\n\n**2. Priya Patel** — She commented on your last two posts but you haven't responded. A quick DM thanking her and asking about her startup would take 30 seconds and mean a lot.\n\n**3. Marcus Rivera** — Your meeting last week went well but there's no follow-up yet. Send the deck you mentioned. Strike while the iron's warm.\n\n**Bonus**: Jordan Taylor has a birthday next week (LinkedIn). Set a reminder to send a personal note — not the generic LinkedIn button.`
   } else if (question.toLowerCase().includes('job') || question.toLowerCase().includes('changed')) {
