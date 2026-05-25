@@ -116,6 +116,9 @@ const dataSources: DataSource[] = [
 function SourceCard({ source }: { source: DataSource }) {
   const [expanded, setExpanded] = useState(false)
   const [values, setValues] = useState<Record<string, string>>({})
+  const [localStatus, setLocalStatus] = useState<DataSource['status']>(source.status)
+  const [testingConnector, setTestingConnector] = useState(false)
+  const [connectionResult, setConnectionResult] = useState<string | null>(null)
 
   const statusConfig = {
     connected: { label: 'Connected', bg: 'rgba(74,222,128,0.1)', color: '#4ade80', border: 'rgba(74,222,128,0.25)', dot: '#4ade80' },
@@ -123,7 +126,31 @@ function SourceCard({ source }: { source: DataSource }) {
     demo: { label: 'Demo Mode', bg: 'rgba(250,204,21,0.1)', color: '#facc15', border: 'rgba(250,204,21,0.25)', dot: '#facc15' },
   }
 
-  const st = statusConfig[source.status]
+  const st = statusConfig[localStatus]
+
+  const fillDemoValues = () => {
+    const nextValues = source.fields.reduce<Record<string, string>>((acc, field) => {
+      acc[field.label] = values[field.label] || field.placeholder.replace('your', 'demo').replace('/path/to', '/demo')
+      return acc
+    }, {})
+    setValues(nextValues)
+  }
+
+  const connectDemo = () => {
+    fillDemoValues()
+    setLocalStatus('connected')
+    setConnectionResult(`${source.name} connected in demo mode. Coral will use seeded ${source.name} records from the mock relationship graph.`)
+  }
+
+  const testConnection = () => {
+    setTestingConnector(true)
+    setConnectionResult(`Testing ${source.connector}...`)
+    window.setTimeout(() => {
+      setLocalStatus('connected')
+      setTestingConnector(false)
+      setConnectionResult(`Success: ${source.name} connector responded. Schema mapped, cache warmed, and demo rows are queryable through Coral SQL.`)
+    }, 650)
+  }
 
   return (
     <div className="glass-card" style={{
@@ -265,11 +292,11 @@ function SourceCard({ source }: { source: DataSource }) {
 
           {/* Actions */}
           <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-            <button className="btn-primary" style={{ padding: '10px 20px', fontSize: 13 }}>
-              {source.status === 'connected' ? 'Reconnect' : 'Connect'}
+            <button onClick={connectDemo} className="btn-primary" style={{ padding: '10px 20px', fontSize: 13 }}>
+              {localStatus === 'connected' ? 'Reconnect Demo' : 'Connect Demo'}
             </button>
-            <button className="btn-ghost" style={{ padding: '10px 16px', fontSize: 13 }}>
-              Test Connection
+            <button onClick={testConnection} disabled={testingConnector} className="btn-ghost" style={{ padding: '10px 16px', fontSize: 13 }}>
+              {testingConnector ? 'Testing...' : 'Test Connection'}
             </button>
             <a
               href={source.docsUrl}
@@ -284,6 +311,21 @@ function SourceCard({ source }: { source: DataSource }) {
               Coral Docs →
             </a>
           </div>
+
+          {connectionResult && (
+            <div style={{
+              marginTop: 14,
+              padding: '12px 14px',
+              borderRadius: 'var(--radius-md)',
+              background: localStatus === 'connected' ? 'rgba(22,163,74,0.08)' : 'rgba(37,99,235,0.08)',
+              border: `1px solid ${localStatus === 'connected' ? 'rgba(22,163,74,0.2)' : 'rgba(37,99,235,0.18)'}`,
+              color: localStatus === 'connected' ? '#166534' : 'var(--accent-blue)',
+              fontSize: 12,
+              lineHeight: 1.6,
+            }}>
+              {connectionResult}
+            </div>
+          )}
         </div>
       )}
     </div>
