@@ -1963,16 +1963,4 @@ button {
   }
 }
 
-/* Custom Cursor Hiding for desktop/mouse users */
-@media (pointer: fine) {
-  body, 
-  a, 
-  button, 
-  input, 
-  select, 
-  textarea, 
-  iframe,
-  [role="button"] {
-    cursor: none !important;
-  }
-}
+/* Custom cursor enhancement — native cursor remains visible */
