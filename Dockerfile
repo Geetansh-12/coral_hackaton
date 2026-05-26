@@ -8,8 +8,8 @@ FROM node:20-slim AS builder
 
 WORKDIR /app
 
-# Install curl for Coral CLI download
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+# Install curl for Coral CLI download and build tools for better-sqlite3
+RUN apt-get update && apt-get install -y curl python3 make g++ && rm -rf /var/lib/apt/lists/*
 
 # Install Coral CLI (Linux binary)
 RUN curl -fsSL https://withcoral.com/install.sh | sh
