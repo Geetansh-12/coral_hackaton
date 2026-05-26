@@ -12,6 +12,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y curl python3 make g++ && rm -rf /var/lib/apt/lists/*
 
 # Install Coral CLI (Linux binary)
+ENV CORAL_VERSION=0.3.0
 RUN curl -fsSL https://withcoral.com/install.sh | sh
 
 # Copy package files and install dependencies
