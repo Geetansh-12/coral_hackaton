@@ -162,7 +162,7 @@ export async function POST(request: Request) {
     } else if (cleanSql.includes('GITHUB.USERS')) {
       // Mock data for the live GitHub join in case they run it in Demo mode
       rows = [
-        { name: 'Sarah Chen', company: 'Stripe', github_username: 'Geetansh-12', public_repos: 7, followers: 0, bio: null },
+        { name: 'Geetansh Vikram', company: 'Stripe', github_username: 'Geetansh-12', public_repos: 7, followers: 0, bio: null },
         { name: 'Marcus Rivera', company: 'Linear', github_username: 'leerob', public_repos: 124, followers: 34500, bio: 'VP Product @ Vercel' },
         { name: 'Priya Patel', company: 'Anthropic', github_username: 'rauchg', public_repos: 245, followers: 82000, bio: 'CEO @ Vercel' }
       ]

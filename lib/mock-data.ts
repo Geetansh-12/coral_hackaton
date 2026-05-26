@@ -10,7 +10,7 @@ const daysAgo = (d: number) => new Date(now.getTime() - d * 86400000).toISOStrin
 
 export const mockContacts: Contact[] = [
   {
-    page_id: 'c001', name: 'Sarah Chen', email: 'sarah.chen@stripe.com',
+    page_id: 'c001', name: 'Geetansh Vikram', email: 'sarah.chen@stripe.com',
     company: 'Stripe', role: 'VP of Engineering', github_username: 'Geetansh-12', tags: ['mentor', 'tech'],
     relationship: 'close', notes: 'Met at StrangeLoop 2023. Great systems thinker. Offered to review my architecture doc.',
     last_contact_at: daysAgo(3), days_since_contact: 3, health_score: 92,

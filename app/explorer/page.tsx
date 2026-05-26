@@ -41,7 +41,7 @@ LEFT JOIN github.users g
 WHERE c.github_username IS NOT NULL;`,
     coralFeatures: ['Live API Join', 'Federated Query', 'SQL Interface'],
     resultPreview: [
-      { name: 'Sarah Chen', company: 'Stripe', github: 'Geetansh-12', repos: 7, followers: 0 },
+      { name: 'Geetansh Vikram', company: 'Stripe', github: 'Geetansh-12', repos: 7, followers: 0 },
       { name: 'Marcus Rivera', company: 'Linear', github: 'leerob', repos: 124, followers: 34500 },
     ],
   },
