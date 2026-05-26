@@ -18,6 +18,8 @@
 
 > **WeMakeDevs Hackathon** — Coral Track Submission
 
+> 🔴 **[Live Demo → coral-hackaton.onrender.com](https://coral-hackaton.onrender.com)** — No setup needed. Click and explore.
+
 Coral CRM joins data from **Gmail, Google Calendar, Slack, LinkedIn, X/Twitter, and Notion** into a single `contact_relationship_graph` using [Coral's](https://withcoral.com) SQL-over-APIs engine. An AI agent then reads that graph to generate pre-meeting briefs, surface fading relationships, and draft outreach — so you never drop the ball on someone who matters.
 
 <p align="center">

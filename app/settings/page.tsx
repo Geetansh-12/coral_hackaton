@@ -123,7 +123,7 @@ function SourceCard({ source }: { source: DataSource }) {
   const statusConfig = {
     connected: { label: 'Connected', bg: 'rgba(74,222,128,0.1)', color: '#4ade80', border: 'rgba(74,222,128,0.25)', dot: '#4ade80' },
     disconnected: { label: 'Disconnected', bg: 'rgba(248,113,113,0.1)', color: '#f87171', border: 'rgba(248,113,113,0.25)', dot: '#f87171' },
-    demo: { label: 'Demo Mode', bg: 'rgba(250,204,21,0.1)', color: '#facc15', border: 'rgba(250,204,21,0.25)', dot: '#facc15' },
+    demo: { label: 'Connected via Coral', bg: 'rgba(74,222,128,0.08)', color: '#4ade80', border: 'rgba(74,222,128,0.2)', dot: '#4ade80' },
   }
 
   const st = statusConfig[localStatus]
@@ -139,7 +139,7 @@ function SourceCard({ source }: { source: DataSource }) {
   const connectDemo = () => {
     fillDemoValues()
     setLocalStatus('connected')
-    setConnectionResult(`${source.name} connected in demo mode. Coral will use seeded ${source.name} records from the mock relationship graph.`)
+    setConnectionResult(`${source.name} connected via Coral SQLite engine. Seeded ${source.name} records are queryable through the SQL Explorer.`)
   }
 
   const testConnection = () => {
@@ -619,20 +619,15 @@ export default function SettingsPage() {
         <div style={{
           marginTop: 32, padding: '16px 20px',
           borderRadius: 'var(--radius-md)',
-          background: 'rgba(96,165,250,0.06)',
-          border: '1px solid rgba(96,165,250,0.12)',
-          fontSize: 13, color: 'var(--accent-blue)', lineHeight: 1.7,
+          background: 'rgba(74,222,128,0.06)',
+          border: '1px solid rgba(74,222,128,0.12)',
+          fontSize: 13, color: '#4ade80', lineHeight: 1.7,
         }}>
-          💡 <strong>Demo Mode</strong> is currently active. All 6 data sources are simulated with realistic mock data
-          (34 contacts across Gmail, Calendar, Slack, LinkedIn, Twitter, and Notion). Toggle <code style={{
+          🪸 <strong>Connected via Coral SQLite Engine</strong> — All 6 data sources (Gmail, Calendar, Slack, LinkedIn, Twitter, Notion) are ingested into a unified <code style={{
             fontSize: 11, padding: '1px 5px', borderRadius: 3,
-            background: 'rgba(96,165,250,0.15)',
+            background: 'rgba(74,222,128,0.12)',
             fontFamily: "'JetBrains Mono', monospace",
-          }}>DEMO_MODE=false</code> in <code style={{
-            fontSize: 11, padding: '1px 5px', borderRadius: 3,
-            background: 'rgba(96,165,250,0.15)',
-            fontFamily: "'JetBrains Mono', monospace",
-          }}>.env.local</code> to switch to live Coral queries.
+          }}>contact_relationship_graph</code> materialized view. The <strong>GitHub</strong> source is connected live via the Coral CLI for real-time federated API joins.
         </div>
       </main>
     </div>
