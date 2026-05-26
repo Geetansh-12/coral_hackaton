@@ -55,8 +55,8 @@ export default function LandingPage() {
           <Link href="/explorer">SQL Explorer</Link>
           <Link href="/settings">Sources</Link>
         </div>
-        <Link href="/dashboard" className="button button-dark">
-          Launch app <ArrowRight size={16} />
+        <Link href="/login" className="button button-dark">
+          Sign in <ArrowRight size={16} />
         </Link>
       </nav>
 
@@ -72,7 +72,7 @@ export default function LandingPage() {
             and the right follow-up before the opportunity gets cold.
           </p>
           <div className="hero-actions">
-            <Link href="/dashboard" className="button button-dark button-large">
+            <Link href="/login" className="button button-dark button-large">
               Open command center <ArrowRight size={18} />
             </Link>
             <Link href="/explorer" className="button button-light button-large">

@@ -22,7 +22,3 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
   }
 }
-
-export function isDemoMode() {
-  return !!global.DEMO_MODE
-}
