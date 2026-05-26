@@ -71,6 +71,7 @@ CREATE TABLE IF NOT EXISTS notion_contacts (
   email           TEXT,
   company         TEXT,
   role            TEXT,
+  github_username TEXT,
   tags            TEXT[],
   relationship    TEXT,
   notes           TEXT,
@@ -159,7 +160,7 @@ CREATE MATERIALIZED VIEW contact_relationship_graph AS
 
 WITH
 contacts AS (
-  SELECT page_id, name, email, company, role, tags, relationship, notes
+  SELECT page_id, name, email, company, role, github_username, tags, relationship, notes
   FROM notion_contacts
   WHERE email IS NOT NULL
 ),
@@ -210,7 +211,7 @@ linkedin_stats AS (
 )
 
 SELECT
-  c.page_id, c.name, c.email, c.company, c.role, c.tags, c.relationship, c.notes,
+  c.page_id, c.name, c.email, c.company, c.role, c.github_username, c.tags, c.relationship, c.notes,
   GREATEST(e.last_email_received, cal.last_meeting, s.last_slack, t.last_twitter_interaction, l.last_linkedin_signal) AS last_contact_at,
   EXTRACT(DAY FROM NOW() - GREATEST(e.last_email_received, cal.last_meeting, s.last_slack, t.last_twitter_interaction, l.last_linkedin_signal)) AS days_since_contact,
   e.last_email_received, e.total_emails_received, e.total_emails_sent,

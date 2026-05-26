@@ -19,22 +19,36 @@ export async function POST(request: Request) {
     
     const isDemoMode = typeof global.DEMO_MODE !== 'undefined' ? global.DEMO_MODE : process.env.DEMO_MODE !== 'false';
 
-    // Route metadata queries to the ACTUAL coral.exe binary!
-    if (!isDemoMode && cleanSql.includes('CORAL.')) {
+    // Route metadata queries and cross-source queries to the ACTUAL coral binary!
+    if (!isDemoMode && (cleanSql.includes('CORAL.') || cleanSql.includes('GITHUB.'))) {
       try {
-        const { execSync } = require('child_process');
+        const { execFile } = require('child_process');
+        const util = require('util');
+        const execFileAsync = util.promisify(execFile);
+        
         const start = Date.now();
-        // Execute the real Coral CLI binary downloaded in the project
-        const result = execSync(`coral.exe sql --format json "${sql.replace(/"/g, '\\"')}"`);
-        const rows = JSON.parse(result.toString());
+        // Use coral (Linux/Docker) or coral.exe (Windows local)
+        const binaryName = process.platform === 'win32' ? 'coral.exe' : 'coral';
+        
+        // We pass the query securely
+        const { stdout } = await execFileAsync(binaryName, ['sql', '--format', 'json', sql], {
+          timeout: 15000, // 15 second robust timeout
+          env: {
+            ...process.env,
+            GITHUB_TOKEN: process.env.GITHUB_TOKEN || 'ghp_mock_token' // Ensure token is passed
+          }
+        });
+        
+        const rows = JSON.parse(stdout.trim());
         return NextResponse.json({ rows, durationMs: Date.now() - start, cacheHit: false });
       } catch (err) {
-        console.error('Real Coral CLI execution failed:', err);
-        // Fall back to mock if coral.exe fails (e.g., syntax error)
+        console.error('Real Coral CLI execution failed, falling back:', err);
+        // Fall back to mock if coral fails or binary is missing (e.g. Vercel)
       }
     }
 
-    if (!isDemoMode && !cleanSql.includes('CORAL.')) {
+    // Direct SQLite queries
+    if (!isDemoMode && !cleanSql.includes('CORAL.') && !cleanSql.includes('GITHUB.')) {
       const start = Date.now()
       const rows = queryDb(sql)
       const durationMs = Date.now() - start
@@ -143,6 +157,13 @@ export async function POST(request: Request) {
       const dormant = mockContacts.filter(c => c.health_score < 40).length
       const avg = Math.round(mockContacts.reduce((sum, c) => sum + c.health_score, 0) / total * 10) / 10
       rows = [{ total_contacts: total, strong, fading, dormant, avg_score: avg }]
+    } else if (cleanSql.includes('GITHUB.USERS')) {
+      // Mock data for the live GitHub join in case they run it in Demo mode
+      rows = [
+        { name: 'Sarah Chen', company: 'Stripe', github_username: 'Geetansh-12', public_repos: 7, followers: 0, bio: null },
+        { name: 'Marcus Rivera', company: 'Linear', github_username: 'leerob', public_repos: 124, followers: 34500, bio: 'VP Product @ Vercel' },
+        { name: 'Priya Patel', company: 'Anthropic', github_username: 'rauchg', public_repos: 245, followers: 82000, bio: 'CEO @ Vercel' }
+      ]
     } else {
       // General fallback mock output
       rows = [

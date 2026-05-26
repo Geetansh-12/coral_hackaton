@@ -9,6 +9,7 @@ export interface Contact {
   email: string
   company: string | null
   role: string | null
+  github_username?: string | null
   tags: string[]
   relationship: 'close' | 'professional' | 'acquaintance' | null
   notes: string | null

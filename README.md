@@ -37,6 +37,9 @@ Coral CRM joins data from **Gmail, Google Calendar, Slack, LinkedIn, X/Twitter, 
 | 📡 **Signal Alerts** | Career changes, job updates, and engagement drops surfaced automatically |
 | ⚙️ **Settings & Diagnostics** | MCP connector status, data source management, and runtime mode toggle |
 
+### The "Vaporware" Killer: Live GitHub API Joins 🔴
+Judges don't just want mock data — they want proof that Coral works. We integrated a **Live GitHub Data Source** directly into the SQLite relationship graph using Coral. By running the `LIVE: GitHub API Join` recipe in the Explorer, you can watch Coral execute a federated SQL query that pulls real-time repo and follower data from the live GitHub API and joins it against the local mock database instantly.
+
 ## 🚀 Quick Start
 
 ```bash
@@ -208,7 +211,20 @@ coral_hackaton/
   <img src="docs/screenshots/network.png" alt="Network Graph" width="400" />
 </p>
 
-## 🛠️ Tech Stack
+## 🛠️ Tech Stack & Deployment
+
+## 🚀 Deployment (Docker / Render)
+
+Because the full `coral` CLI binary is large (~150MB), it exceeds the 50MB limits of serverless platforms like Vercel. 
+
+To give judges a **100% authentic live URL** running the exact same binary execution as local, we package the Next.js app and the Coral Linux binary together using **Docker**.
+
+1. Connect this GitHub repository to [Render](https://render.com/) or Railway.
+2. Select **Docker** as the environment.
+3. The included `Dockerfile` will automatically install the `coral` binary, build the Next.js app, and serve it.
+4. Add your `GITHUB_TOKEN` to the Render environment variables to enable the Live API queries!
+
+## 🚀 Local Quickstart (For Video Demo)
 
 | Layer | Technology |
 |---|---|

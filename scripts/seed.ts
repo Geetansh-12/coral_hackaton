@@ -16,6 +16,7 @@ console.log('Seeding SQLite database at', dbPath)
 
 // Drop existing tables and views
 const dropStatements = `
+  DROP TABLE IF EXISTS contact_relationship_graph;
   DROP VIEW IF EXISTS contact_relationship_graph;
   DROP TABLE IF EXISTS slack_messages;
   DROP TABLE IF EXISTS linkedin_activity;
@@ -65,6 +66,7 @@ CREATE TABLE notion_contacts (
     email TEXT,
     company TEXT,
     role TEXT,
+    github_username TEXT,
     tags TEXT, -- JSON array
     relationship TEXT,
     notes TEXT,
@@ -112,8 +114,8 @@ db.exec(createTables)
 
 // Seed notion_contacts (acts as the base registry)
 const insertNotion = db.prepare(`
-  INSERT INTO notion_contacts (page_id, name, email, company, role, tags, relationship, notes)
-  VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  INSERT INTO notion_contacts (page_id, name, email, company, role, github_username, tags, relationship, notes)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 `)
 
 mockContacts.forEach(c => {
@@ -123,6 +125,7 @@ mockContacts.forEach(c => {
     c.email,
     c.company,
     c.role,
+    c.github_username || null,
     JSON.stringify(c.tags || []),
     c.relationship,
     c.notes
@@ -227,7 +230,7 @@ LEFT JOIN aggregated_stats a ON n.email = a.email;
 `
 // Wait, we need the exact schema to match `Contact` type.
 // But we need the values to be dynamic per row if we do a view, or we can just create a real table for the graph and populate it.
-db.exec('DROP VIEW IF EXISTS contact_relationship_graph;')
+db.exec('DROP TABLE IF EXISTS contact_relationship_graph;')
 
 // Let's create a real table instead of a view to hold the precomputed graph (which is what a Materialized View is anyway)
 db.exec(`
@@ -237,6 +240,7 @@ CREATE TABLE contact_relationship_graph (
     email TEXT,
     company TEXT,
     role TEXT,
+    github_username TEXT,
     tags TEXT,
     relationship TEXT,
     notes TEXT,
@@ -255,16 +259,16 @@ CREATE TABLE contact_relationship_graph (
 
 const insertGraph = db.prepare(`
   INSERT INTO contact_relationship_graph (
-    page_id, name, email, company, role, tags, relationship, notes,
+    page_id, name, email, company, role, github_username, tags, relationship, notes,
     last_contact_at, days_since_contact, health_score,
     total_emails_received, total_emails_sent, total_meetings,
     linkedin_interactions, total_slack_messages, twitter_interactions, linkedin_recent_signals
-  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `)
 
 mockContacts.forEach(c => {
   insertGraph.run(
-    c.page_id, c.name, c.email, c.company, c.role, JSON.stringify(c.tags || []),
+    c.page_id, c.name, c.email, c.company, c.role, c.github_username || null, JSON.stringify(c.tags || []),
     c.relationship, c.notes, c.last_contact_at, c.days_since_contact, c.health_score,
     c.total_emails_received, c.total_emails_sent, c.total_meetings,
     0, c.total_slack_messages, c.twitter_interactions, c.linkedin_recent_signals

@@ -11,7 +11,7 @@ const daysAgo = (d: number) => new Date(now.getTime() - d * 86400000).toISOStrin
 export const mockContacts: Contact[] = [
   {
     page_id: 'c001', name: 'Sarah Chen', email: 'sarah.chen@stripe.com',
-    company: 'Stripe', role: 'VP of Engineering', tags: ['mentor', 'tech'],
+    company: 'Stripe', role: 'VP of Engineering', github_username: 'Geetansh-12', tags: ['mentor', 'tech'],
     relationship: 'close', notes: 'Met at StrangeLoop 2023. Great systems thinker. Offered to review my architecture doc.',
     last_contact_at: daysAgo(3), days_since_contact: 3, health_score: 92,
     last_email_received: daysAgo(3), total_emails_received: 24, total_emails_sent: 18,
@@ -22,7 +22,7 @@ export const mockContacts: Contact[] = [
   },
   {
     page_id: 'c002', name: 'Marcus Rivera', email: 'marcus@linear.so',
-    company: 'Linear', role: 'Co-founder & CTO', tags: ['founder', 'investor-track'],
+    company: 'Linear', role: 'Co-founder & CTO', github_username: 'leerob', tags: ['founder', 'investor-track'],
     relationship: 'professional', notes: 'Brilliant product mind. Wants to collaborate on dev tools.',
     last_contact_at: daysAgo(8), days_since_contact: 8, health_score: 85,
     last_email_received: daysAgo(8), total_emails_received: 12, total_emails_sent: 10,
@@ -33,7 +33,7 @@ export const mockContacts: Contact[] = [
   },
   {
     page_id: 'c003', name: 'Priya Patel', email: 'priya@anthropic.com',
-    company: 'Anthropic', role: 'Research Scientist', tags: ['AI', 'research'],
+    company: 'Anthropic', role: 'Research Scientist', github_username: 'rauchg', tags: ['AI', 'research'],
     relationship: 'close', notes: 'Co-authored the alignment paper. Sharp thinker on safety.',
     last_contact_at: daysAgo(2), days_since_contact: 2, health_score: 95,
     last_email_received: daysAgo(2), total_emails_received: 31, total_emails_sent: 28,
@@ -44,7 +44,7 @@ export const mockContacts: Contact[] = [
   },
   {
     page_id: 'c004', name: 'Alex Kim', email: 'alex.kim@anthropic.com',
-    company: 'Anthropic', role: 'Staff Engineer', tags: ['engineer', 'ex-colleague'],
+    company: 'Anthropic', role: 'Staff Engineer', github_username: null, tags: ['engineer', 'ex-colleague'],
     relationship: 'close', notes: 'Worked together at Google for 2 years. Great debugging partner.',
     last_contact_at: daysAgo(12), days_since_contact: 12, health_score: 78,
     last_email_received: daysAgo(12), total_emails_received: 18, total_emails_sent: 15,
@@ -55,7 +55,7 @@ export const mockContacts: Contact[] = [
   },
   {
     page_id: 'c005', name: 'Jordan Taylor', email: 'jordan@vercel.com',
-    company: 'Vercel', role: 'Head of Developer Relations', tags: ['devrel', 'speaker'],
+    company: 'Vercel', role: 'Head of Developer Relations', github_username: null, tags: ['devrel', 'speaker'],
     relationship: 'professional', notes: 'Amazing speaker. Connected us to the Next.js team.',
     last_contact_at: daysAgo(5), days_since_contact: 5, health_score: 88,
     last_email_received: daysAgo(5), total_emails_received: 15, total_emails_sent: 12,
@@ -66,7 +66,7 @@ export const mockContacts: Contact[] = [
   },
   {
     page_id: 'c006', name: 'Rachel Kim', email: 'rachel@a16z.com',
-    company: 'a16z', role: 'Partner', tags: ['investor', 'advisor'],
+    company: 'a16z', role: 'Partner', github_username: null, tags: ['investor', 'advisor'],
     relationship: 'professional', notes: 'Intro-ed us to 3 portfolio companies. Strong in infrastructure.',
     last_contact_at: daysAgo(89), days_since_contact: 89, health_score: 32,
     last_email_received: daysAgo(89), total_emails_received: 8, total_emails_sent: 6,
@@ -77,7 +77,7 @@ export const mockContacts: Contact[] = [
   },
   {
     page_id: 'c007', name: 'David Park', email: 'david.park@notion.so',
-    company: 'Notion', role: 'PM Lead', tags: ['product', 'API'],
+    company: 'Notion', role: 'PM Lead', github_username: null, tags: ['product', 'API'],
     relationship: 'professional', notes: 'Discussing API integration partnership. Sharp product sense.',
     last_contact_at: daysAgo(65), days_since_contact: 65, health_score: 38,
     last_email_received: daysAgo(65), total_emails_received: 10, total_emails_sent: 8,

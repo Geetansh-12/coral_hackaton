@@ -20,6 +20,32 @@ interface QueryExample {
 
 const queries: QueryExample[] = [
   {
+    id: 'q0',
+    title: 'LIVE: GitHub API Join',
+    description: 'The Holy Grail — a true cross-source join between a local SQLite database and the live GitHub SaaS API using the Coral engine.',
+    category: 'cross-source',
+    sql: `-- 🔴 LIVE API QUERY
+-- This query proves Coral is executing federated joins.
+-- It connects our local SQLite database to the live GitHub API.
+
+SELECT 
+  c.name, 
+  c.company, 
+  c.github_username,
+  g.public_repos,
+  g.followers,
+  g.bio
+FROM sqlite_db.contact_relationship_graph c
+LEFT JOIN github.users g 
+  ON c.github_username = g.username
+WHERE c.github_username IS NOT NULL;`,
+    coralFeatures: ['Live API Join', 'Federated Query', 'SQL Interface'],
+    resultPreview: [
+      { name: 'Sarah Chen', company: 'Stripe', github: 'Geetansh-12', repos: 7, followers: 0 },
+      { name: 'Marcus Rivera', company: 'Linear', github: 'leerob', repos: 124, followers: 34500 },
+    ],
+  },
+  {
     id: 'q1',
     title: 'Contact Relationship Graph',
     description: 'The core materialized view — joins Gmail, Calendar, Slack, Twitter, LinkedIn, and Notion into one row per contact with a health score.',

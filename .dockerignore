@@ -1,0 +1,8 @@
+node_modules
+.next
+.git
+coral.exe
+coral.zip
+*.log
+.env.local
+data/*.db
