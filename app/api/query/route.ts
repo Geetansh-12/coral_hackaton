@@ -17,7 +17,9 @@ export async function POST(request: Request) {
     const cacheHit = Math.random() > 0.4 // 60% chance of cache HIT on requests
     const baseTime = cacheHit ? 2 : (isQuick ? 15 : 45)
     
-    const isDemoMode = typeof global.DEMO_MODE !== 'undefined' ? global.DEMO_MODE : process.env.DEMO_MODE !== 'false';
+    // Default to LIVE mode in production unless explicitly set to true. Default to DEMO mode in dev.
+    const isProd = process.env.NODE_ENV === 'production';
+    const isDemoMode = typeof global.DEMO_MODE !== 'undefined' ? global.DEMO_MODE : (isProd ? process.env.DEMO_MODE === 'true' : process.env.DEMO_MODE !== 'false');
 
     // Route metadata queries and cross-source queries to the ACTUAL coral binary!
     if (!isDemoMode && (cleanSql.includes('CORAL.') || cleanSql.includes('GITHUB.'))) {
