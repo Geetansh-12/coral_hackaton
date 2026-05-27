@@ -297,19 +297,6 @@ function SourceCard({ source }: { source: DataSource }) {
             </button>
             <button onClick={testConnection} disabled={testingConnector} className="btn-ghost" style={{ padding: '10px 16px', fontSize: 13 }}>
               {testingConnector ? 'Testing...' : 'Test Connection'}
-            </button>
-            <a
-              href={source.docsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                fontSize: 12, color: 'var(--accent-blue)',
-                textDecoration: 'none', marginLeft: 'auto',
-                display: 'flex', alignItems: 'center', gap: 4,
-              }}
-            >
-              Coral Docs →
-            </a>
           </div>
 
           {connectionResult && (
