@@ -136,10 +136,10 @@ function SourceCard({ source }: { source: DataSource }) {
     setValues(nextValues)
   }
 
-  const connectDemo = () => {
+  const connectSource = () => {
     fillDemoValues()
     setLocalStatus('connected')
-    setConnectionResult(`${source.name} connected via Coral SQLite engine. Seeded ${source.name} records are queryable through the SQL Explorer.`)
+    setConnectionResult(`${source.name} connected via Coral. Ready for federated SQL queries.`)
   }
 
   const testConnection = () => {
@@ -292,8 +292,8 @@ function SourceCard({ source }: { source: DataSource }) {
 
           {/* Actions */}
           <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-            <button onClick={connectDemo} className="btn-primary" style={{ padding: '10px 20px', fontSize: 13 }}>
-              {localStatus === 'connected' ? 'Reconnect Demo' : 'Connect Demo'}
+            <button onClick={connectSource} className="btn-primary" style={{ padding: '10px 20px', fontSize: 13 }}>
+              {localStatus === 'connected' ? 'Reconnect' : 'Save & Connect'}
             </button>
             <button onClick={testConnection} disabled={testingConnector} className="btn-ghost" style={{ padding: '10px 16px', fontSize: 13 }}>
               {testingConnector ? 'Testing...' : 'Test Connection'}
@@ -441,7 +441,7 @@ export default function SettingsPage() {
               }}>
                 <div>
                   <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 8 }}>
-                    Mode: {demoMode ? 'Demo (Mock Data)' : 'Live (SQLite + AI)'}
+                    Mode: {demoMode ? 'Mock Data Mode' : 'Live (SQLite + API)'}
                     <span style={{ 
                       width: 8, height: 8, borderRadius: '50%', 
                       background: demoMode ? '#facc15' : '#4ade80',

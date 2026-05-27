@@ -220,7 +220,7 @@ coral_hackaton/
 │   └── schema.sql               # 6-source schema + materialized view
 ├── scripts/
 │   └── seed.ts                  # Database seeder
-├── coral.exe                    # Coral CLI binary (auto-downloaded)
+├── coral / coral.exe            # Coral CLI binary (auto-downloaded)
 └── docs/
     ├── CORAL_SETUP.md           # Judge setup guide
     └── SUBMISSION.md            # Submission details
