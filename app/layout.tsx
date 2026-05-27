@@ -6,6 +6,18 @@ export const metadata: Metadata = {
   title: 'Coral CRM — Relationship Intelligence for Humans',
   description: 'A personal CRM powered by Coral SQL cross-source joins and Claude AI. Track, understand, and nurture your professional relationships across Gmail, Calendar, Slack, LinkedIn, Twitter, and Notion.',
   keywords: ['CRM', 'relationship intelligence', 'Coral SQL', 'AI', 'personal CRM', 'networking'],
+  openGraph: {
+    title: 'Coral CRM — Relationship Intelligence for Humans',
+    description: 'A personal CRM powered by Coral SQL cross-source joins. Track and nurture your professional relationships across 6 data sources.',
+    url: 'https://coral-hackaton.onrender.com',
+    siteName: 'Coral CRM',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Coral CRM',
+    description: 'Relationship intelligence powered by Coral SQL',
+  },
 }
 
 export default function RootLayout({
@@ -20,6 +32,7 @@ export default function RootLayout({
         <meta name="theme-color" content="#0a0a08" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
       </head>
       <body>
         <CustomCursor />

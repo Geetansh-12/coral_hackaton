@@ -34,3 +34,8 @@ yarn-error.log*
 next-env.d.ts
 data/  
 coral.exe 
+*.csv  
+*.jsonl 
+coral.zip  
+scripts/test-*.js  
+scripts/test-*.mjs  
