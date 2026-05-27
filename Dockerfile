@@ -50,9 +50,16 @@ RUN apt-get update && \
     apt-get install -y nodejs && \
     rm -rf /var/lib/apt/lists/*
 
-# Copy Coral binary from builder
+# Copy Coral binary AND its config/data from builder
 COPY --from=builder /root/.local/bin/coral /usr/local/bin/coral
 RUN chmod +x /usr/local/bin/coral
+
+# Copy Coral's config and data directories from the builder
+COPY --from=builder /root/.config/ /root/.config/
+COPY --from=builder /root/.local/share/ /root/.local/share/
+
+# Verify Coral works during build
+RUN coral --version && coral source list
 
 # Copy built app
 COPY --from=builder /app/.next ./.next
@@ -68,9 +75,8 @@ COPY --from=builder /app/data ./data
 # Expose port
 EXPOSE 3000
 
-# Ensure Coral has a proper HOME directory for its config
+# Ensure Coral has a proper HOME directory
 ENV HOME=/root
-RUN mkdir -p /root/.config/coral
 
 # Start the app
 CMD ["npm", "start"]
