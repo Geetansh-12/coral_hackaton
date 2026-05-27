@@ -23,34 +23,84 @@ export async function POST(request: Request) {
 
     // Route metadata queries and cross-source queries to the ACTUAL coral binary!
     if (!isDemoMode && (cleanSql.includes('CORAL.') || cleanSql.includes('GITHUB.'))) {
+      // First, try the real Coral CLI binary
       try {
         const { execFile } = require('child_process');
         const util = require('util');
         const execFileAsync = util.promisify(execFile);
         
         const start = Date.now();
-        // Use coral (Linux/Docker) or coral.exe (Windows local)
         const binaryName = process.platform === 'win32' ? 'coral.exe' : 'coral';
         
-        // We pass the query securely
         const { stdout } = await execFileAsync(binaryName, ['sql', '--format', 'json', sql], {
-          timeout: 15000, // 15 second robust timeout
+          timeout: 15000,
           env: {
             ...process.env,
             HOME: process.env.HOME || '/root',
-            GITHUB_TOKEN: process.env.GITHUB_TOKEN || 'ghp_mock_token' // Ensure token is passed
+            GITHUB_TOKEN: process.env.GITHUB_TOKEN || ''
           }
         });
         
         const rows = JSON.parse(stdout.trim());
         return NextResponse.json({ rows, durationMs: Date.now() - start, cacheHit: false });
-      } catch (err: any) {
-        console.error('Real Coral CLI execution failed:', err);
-        return NextResponse.json({ 
-          error: 'Coral CLI execution failed', 
-          details: err.message, 
-          stderr: err.stderr ? err.stderr.toString() : '' 
-        }, { status: 500 });
+      } catch (coralErr: any) {
+        console.error('Coral CLI failed, trying direct GitHub API fallback:', coralErr.message);
+      }
+
+      // Fallback: Call GitHub API directly when Coral CLI is unavailable
+      if (cleanSql.includes('GITHUB.')) {
+        try {
+          const start = Date.now();
+          const token = process.env.GITHUB_TOKEN || '';
+          
+          // Extract usernames from the SQL query
+          const usernameMatches = sql.match(/['"]([^'"]+)['"]/g);
+          const usernames: string[] = usernameMatches 
+            ? usernameMatches.map((m: string) => m.replace(/['"]/g, ''))
+            : ['Geetansh-12', 'leerob', 'rauchg'];
+
+          // Fetch each user from GitHub API in parallel
+          const headers: Record<string, string> = { 'Accept': 'application/vnd.github+json', 'User-Agent': 'CoralCRM' };
+          if (token) headers['Authorization'] = `Bearer ${token}`;
+
+          const results = await Promise.all(
+            usernames.map(async (username: string) => {
+              try {
+                const res = await fetch(`https://api.github.com/users/${username}`, { headers });
+                if (!res.ok) return null;
+                return await res.json();
+              } catch { return null; }
+            })
+          );
+
+          // Map GitHub API response to SQL-like rows
+          const rows = results.filter(Boolean).map((u: any) => ({
+            username: u.login,
+            name: u.name,
+            company: u.company,
+            public_repos: u.public_repos,
+            followers: u.followers,
+            following: u.following,
+            bio: u.bio,
+            location: u.location,
+            twitter_username: u.twitter_username,
+            created_at: u.created_at,
+            blog: u.blog,
+          }));
+
+          return NextResponse.json({ 
+            rows, 
+            durationMs: Date.now() - start, 
+            cacheHit: false,
+            source: 'github_api_live'
+          });
+        } catch (apiErr: any) {
+          console.error('Direct GitHub API also failed:', apiErr.message);
+          return NextResponse.json({ 
+            error: 'Both Coral CLI and direct GitHub API failed', 
+            details: apiErr.message 
+          }, { status: 500 });
+        }
       }
     }
 
