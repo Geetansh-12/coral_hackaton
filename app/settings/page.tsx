@@ -13,7 +13,7 @@ interface DataSource {
   icon: string
   description: string
   connector: string
-  status: 'connected' | 'disconnected' | 'demo'
+  status: 'connected' | 'disconnected' | 'demo' | 'live' | 'seeded'
   color: string
   fields: { label: string; placeholder: string; type?: string }[]
   features: string[]
@@ -27,7 +27,7 @@ const dataSources: DataSource[] = [
     icon: '📧',
     description: 'Email threads, subjects, send/receive patterns, attachments, and labels.',
     connector: 'Coral Gmail MCP Connector',
-    status: 'demo',
+    status: 'seeded',
     color: '#ea4335',
     fields: [
       { label: 'Google Client ID', placeholder: 'your-client-id.apps.googleusercontent.com' },
@@ -42,7 +42,7 @@ const dataSources: DataSource[] = [
     icon: '📅',
     description: 'Meetings, attendees, response status, recurring events, and video links.',
     connector: 'Coral Calendar MCP Connector',
-    status: 'demo',
+    status: 'seeded',
     color: '#4285f4',
     fields: [
       { label: 'Google Client ID', placeholder: 'Shared with Gmail OAuth' },
@@ -57,7 +57,7 @@ const dataSources: DataSource[] = [
     icon: '💬',
     description: 'Direct messages, channel mentions, thread context, and sender info.',
     connector: 'Coral Slack MCP Connector',
-    status: 'demo',
+    status: 'seeded',
     color: '#e01e5a',
     fields: [
       { label: 'Slack Bot Token', placeholder: 'xoxb-...', type: 'password' },
@@ -72,7 +72,7 @@ const dataSources: DataSource[] = [
     icon: '📝',
     description: 'Contact database, notes, tags, custom properties, and relationship types.',
     connector: 'Coral Notion API Connector',
-    status: 'demo',
+    status: 'seeded',
     color: '#ffffff',
     fields: [
       { label: 'Notion API Key', placeholder: 'secret_...', type: 'password' },
@@ -87,7 +87,7 @@ const dataSources: DataSource[] = [
     icon: '💼',
     description: 'Job changes, promotions, new connections, and profile activity signals.',
     connector: 'Coral CSV Import / LinkedIn API',
-    status: 'demo',
+    status: 'seeded',
     color: '#0a66c2',
     fields: [
       { label: 'LinkedIn CSV Path', placeholder: '/path/to/connections.csv' },
@@ -102,7 +102,7 @@ const dataSources: DataSource[] = [
     icon: '𝕏',
     description: 'Mentions, replies, DMs, engagement metrics, and social interactions.',
     connector: 'Coral Twitter API Connector',
-    status: 'demo',
+    status: 'seeded',
     color: '#1da1f2',
     fields: [
       { label: 'Bearer Token', placeholder: 'AAAA...', type: 'password' },
@@ -110,6 +110,20 @@ const dataSources: DataSource[] = [
     ],
     features: ['Mention tracking', 'Reply ingestion', 'DM sync', 'Engagement scoring'],
     docsUrl: 'https://docs.coral.dev/connectors/twitter',
+  },
+  {
+    id: 'github',
+    name: 'GitHub',
+    icon: '🐙',
+    description: 'Repositories, issues, PRs, and cross-source profile data joined live via API.',
+    connector: 'Coral GitHub Live API',
+    status: 'live',
+    color: '#fafafa',
+    fields: [
+      { label: 'GitHub Personal Access Token', placeholder: 'ghp_...', type: 'password' },
+    ],
+    features: ['Live API Join', 'Profile extraction', 'Repo sync', 'Issue tracking'],
+    docsUrl: 'https://docs.coral.dev/connectors/github',
   },
 ]
 
@@ -124,6 +138,8 @@ function SourceCard({ source }: { source: DataSource }) {
     connected: { label: 'Connected', bg: 'rgba(74,222,128,0.1)', color: '#4ade80', border: 'rgba(74,222,128,0.25)', dot: '#4ade80' },
     disconnected: { label: 'Disconnected', bg: 'rgba(248,113,113,0.1)', color: '#f87171', border: 'rgba(248,113,113,0.25)', dot: '#f87171' },
     demo: { label: 'Connected via Coral', bg: 'rgba(74,222,128,0.08)', color: '#4ade80', border: 'rgba(74,222,128,0.2)', dot: '#4ade80' },
+    live: { label: 'Live', bg: 'rgba(239,68,68,0.1)', color: '#ef4444', border: 'rgba(239,68,68,0.25)', dot: '#ef4444' },
+    seeded: { label: 'Seeded SQLite', bg: 'rgba(56,189,248,0.1)', color: '#38bdf8', border: 'rgba(56,189,248,0.25)', dot: '#38bdf8' },
   }
 
   const st = statusConfig[localStatus]
@@ -603,19 +619,14 @@ export default function SettingsPage() {
           ))}
         </div>
 
-        {/* Bottom note */}
         <div style={{
           marginTop: 32, padding: '16px 20px',
           borderRadius: 'var(--radius-md)',
-          background: 'rgba(74,222,128,0.06)',
-          border: '1px solid rgba(74,222,128,0.12)',
-          fontSize: 13, color: '#4ade80', lineHeight: 1.7,
+          background: 'rgba(56,189,248,0.06)',
+          border: '1px solid rgba(56,189,248,0.12)',
+          fontSize: 13, color: '#38bdf8', lineHeight: 1.7,
         }}>
-          🪸 <strong>Connected via Coral SQLite Engine</strong> — All 6 data sources (Gmail, Calendar, Slack, LinkedIn, Twitter, Notion) are ingested into a unified <code style={{
-            fontSize: 11, padding: '1px 5px', borderRadius: 3,
-            background: 'rgba(74,222,128,0.12)',
-            fontFamily: "'JetBrains Mono', monospace",
-          }}>contact_relationship_graph</code> materialized view. The <strong>GitHub</strong> source is connected live via the Coral CLI for real-time federated API joins.
+          🪸 <strong>GitHub is connected live via Coral's federated SQL engine.</strong> Remaining sources (Gmail, Calendar, Slack, Notion, LinkedIn, Twitter) use a seeded SQLite dataset to simulate cross-source joins. Run the <strong>Live GitHub API Join</strong> in the Explorer to see real data.
         </div>
       </main>
     </div>
