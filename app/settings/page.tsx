@@ -468,7 +468,7 @@ export default function SettingsPage() {
                   onClick={toggleMode}
                   style={{
                     background: demoMode ? 'var(--accent-blue)' : 'var(--text-primary)',
-                    color: demoMode ? 'white' : '#000',
+                    color: 'white',
                     border: 'none', borderRadius: 'var(--radius-full)',
                     padding: '8px 16px', fontSize: 12, fontWeight: 600,
                     cursor: 'pointer', transition: 'all 0.2s'
