@@ -25,6 +25,12 @@ Coral CRM joins data from **Gmail, Google Calendar, Slack, LinkedIn, X/Twitter, 
 <p align="center">
   <img src="docs/screenshots/dashboard.png" alt="Dashboard" width="720" />
 </p>
+<p align="center">
+  <em>Above: The main command center. Below: Live GitHub API federated join through the Coral SQL Explorer.</em>
+</p>
+<p align="center">
+  <img src="docs/screenshots/explorer-github.png" alt="Live GitHub Join" width="720" />
+</p>
 
 ## ✨ Features
 
@@ -85,8 +91,8 @@ GEMINI_API_KEY=your_gemini_key        # Free tier at ai.google.dev
 │   └────┬────────────────┬─────────────────────────────┘   │
 │        │                │                                 │
 │   ┌────▼────┐     ┌─────▼──────┐                         │
-│   │ SQLite  │     │ coral.exe  │  ← real Coral CLI       │
-│   │ (seed)  │     │ (catalog)  │    binary execution     │
+│   │ SQLite  │     │ coral CLI  │  ← async execution      │
+│   │ (local) │     │ (Linux/Win)│    via child_process    │
 │   └────┬────┘     └─────┬──────┘                         │
 │        │                │                                 │
 └────────┼────────────────┼────────────────────────────────┘
@@ -100,7 +106,7 @@ GEMINI_API_KEY=your_gemini_key        # Free tier at ai.google.dev
    └─────────────────────────────────────────────┘
 ```
 
-**Demo Mode** returns rich mock data instantly. **Live Mode** queries a seeded SQLite database and spawns the real `coral.exe` binary via `child_process.execSync` for catalog queries like `coral.tables` and `coral.columns`.
+**Live Mode** queries a seeded SQLite database and spawns the real `coral` CLI binary via asynchronous `child_process.execFile` for federated API queries and schema cataloging (`coral.tables` and `coral.columns`).
 
 ## 🪸 Coral Integration Deep Dive
 
@@ -154,15 +160,22 @@ SELECT query_name, sources_joined, cache_hit_rate, avg_ms
 FROM coral.query_log;
 ```
 
-### 6. Real CLI Binary Execution
+### 6. Real CLI Binary Execution (Async & Scalable)
 
-In Live Mode, the API route spawns the **actual `coral.exe`** binary:
+In Live Mode, the API route spawns the **actual `coral`** binary asynchronously, preventing thread-blocking during slow network API calls:
 
 ```typescript
 // app/api/query/route.ts
-const { execSync } = require('child_process');
-const result = execSync(`coral.exe sql --format json "${sql}"`);
-const rows = JSON.parse(result.toString());
+const { execFile } = require('child_process');
+const util = require('util');
+const execFileAsync = util.promisify(execFile);
+
+// Secure execution with timeouts and environment variable injection
+const { stdout } = await execFileAsync('coral', ['sql', '--format', 'json', sql], {
+  timeout: 15000,
+  env: { ...process.env, GITHUB_TOKEN }
+});
+const rows = JSON.parse(stdout.trim());
 ```
 
 ### 7. MCP Server Integration
@@ -213,7 +226,19 @@ coral_hackaton/
   <img src="docs/screenshots/network.png" alt="Network Graph" width="400" />
 </p>
 
-## 🛠️ Tech Stack & Deployment
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 14 (App Router) |
+| Language | TypeScript 5 |
+| Styling | Tailwind CSS 3.4 + Glassmorphism |
+| Database | better-sqlite3 (local) |
+| AI | Google Gemini (free tier) → Anthropic → Mock fallback |
+| Data Engine | Coral CLI (`coral` binary) |
+| Animations | Framer Motion |
+| Charts | Recharts |
+| Icons | Lucide React |
 
 ## 🚀 Deployment (Docker / Render)
 
@@ -223,22 +248,12 @@ To give judges a **100% authentic live URL** running the exact same binary execu
 
 1. Connect this GitHub repository to [Render](https://render.com/) or Railway.
 2. Select **Docker** as the environment.
-3. The included `Dockerfile` will automatically install the `coral` binary, build the Next.js app, and serve it.
+3. The included `Dockerfile` will automatically install the `coral` binary, build the Next.js app, and bake in the seeded SQLite database.
 4. Add your `GITHUB_TOKEN` to the Render environment variables to enable the Live API queries!
 
 ## 🚀 Local Quickstart (For Video Demo)
 
-| Layer | Technology |
-|---|---|
-| Framework | Next.js 14 (App Router) |
-| Language | TypeScript 5 |
-| Styling | Tailwind CSS 3.4 + Glassmorphism |
-| Database | better-sqlite3 (local) |
-| AI | Google Gemini (free tier) → Anthropic → Mock fallback |
-| Data Engine | Coral CLI (`coral.exe`) |
-| Animations | Framer Motion |
-| Charts | Recharts |
-| Icons | Lucide React |
+You don't need a Coral Cloud account to run this locally. The project falls back to a realistic mock engine, but if you install the `coral.exe` CLI, it will use the real binary for metadata queries!
 
 ## 📝 License
 
