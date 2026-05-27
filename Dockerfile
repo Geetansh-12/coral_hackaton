@@ -68,5 +68,9 @@ COPY --from=builder /app/data ./data
 # Expose port
 EXPOSE 3000
 
+# Ensure Coral has a proper HOME directory for its config
+ENV HOME=/root
+RUN mkdir -p /root/.config/coral
+
 # Start the app
 CMD ["npm", "start"]

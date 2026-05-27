@@ -37,6 +37,7 @@ export async function POST(request: Request) {
           timeout: 15000, // 15 second robust timeout
           env: {
             ...process.env,
+            HOME: process.env.HOME || '/root',
             GITHUB_TOKEN: process.env.GITHUB_TOKEN || 'ghp_mock_token' // Ensure token is passed
           }
         });
