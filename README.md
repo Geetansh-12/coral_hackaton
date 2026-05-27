@@ -22,6 +22,26 @@
 
 Coral CRM joins data from **Gmail, Google Calendar, Slack, LinkedIn, X/Twitter, and Notion** into a single `contact_relationship_graph` using [Coral's](https://withcoral.com) SQL-over-APIs engine. An AI agent then reads that graph to generate pre-meeting briefs, surface fading relationships, and draft outreach — so you never drop the ball on someone who matters.
 
+<p align="center">
+  <img src="docs/screenshots/landing.png" alt="Landing Page — Know who needs you next" width="720" />
+</p>
+<p align="center"><em>Landing page with live Coral pattern inspector and judge demo mode</em></p>
+
+<p align="center">
+  <img src="docs/screenshots/explorer-live.png" alt="Live GitHub API Join via SQL" width="720" />
+</p>
+<p align="center"><em>Live federated query: SQL → GitHub API → real data in 601ms</em></p>
+
+<p align="center">
+  <img src="docs/screenshots/dashboard-stats.png" alt="Dashboard — Stats and Agent Plan" width="400" />
+  <img src="docs/screenshots/dashboard-charts.png" alt="Dashboard — Charts and Contact Grid" width="400" />
+</p>
+<p align="center"><em>AI-powered dashboard: relationship health, channel evidence, meeting prep, and 34 contacts across 6 sources</em></p>
+
+<p align="center">
+  <img src="docs/screenshots/settings.png" alt="Settings — Connected via Coral" width="720" />
+</p>
+<p align="center"><em>All 6 data sources connected via Coral's SQL-over-APIs engine</em></p>
 
 ## ✨ Features
 
