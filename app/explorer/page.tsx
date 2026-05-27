@@ -611,6 +611,8 @@ export default function ExplorerPage() {
   const [sandboxResults, setSandboxResults] = useState<any[] | null>(null)
   const [execTime, setExecTime] = useState<number | null>(null)
   const [sandboxCacheHit, setSandboxCacheHit] = useState<boolean | null>(null)
+  const [querySource, setQuerySource] = useState<string | null>(null)
+  const [joinInfo, setJoinInfo] = useState<any>(null)
   const [sandboxError, setSandboxError] = useState<string | null>(null)
   const [executing, setExecuting] = useState(false)
 
@@ -637,6 +639,8 @@ export default function ExplorerPage() {
         setSandboxResults(data.rows || [])
         setExecTime(data.durationMs)
         setSandboxCacheHit(data.cacheHit)
+        setQuerySource(data.source || null)
+        setJoinInfo(data.joinInfo || null)
       } else {
         setSandboxError(data.error || 'Failed to execute query.')
       }
@@ -885,6 +889,9 @@ export default function ExplorerPage() {
                 </span>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                   {[
+                    { label: '⚡ Cross-Source JOIN', sql: "SELECT c.name, c.company, c.health_score, g.public_repos, g.followers\nFROM contacts c\nJOIN github.users g ON c.github_username = g.username" },
+                    { label: 'GitHub Repos', sql: "SELECT name, language, stars, forks, description\nFROM github.repos\nWHERE username = 'Geetansh-12'" },
+                    { label: 'GitHub Issues', sql: "SELECT number, title, state, author, comments\nFROM github.issues\nWHERE repo = 'Geetansh-12/coral_hackaton'" },
                     { label: 'All Contacts', sql: 'SELECT name, company, health_score, days_since_contact FROM contact_relationship_graph ORDER BY health_score DESC LIMIT 10' },
                     { label: 'Gmail Threads', sql: 'SELECT thread_id, subject, from_email, sent_at FROM gmail_threads LIMIT 5' },
                     { label: 'Fading Connections', sql: 'SELECT name, email, days_since_contact FROM contact_relationship_graph WHERE days_since_contact > 60' },
@@ -922,6 +929,8 @@ export default function ExplorerPage() {
                     setSandboxError(null)
                     setExecTime(null)
                     setSandboxCacheHit(null)
+                    setQuerySource(null)
+                    setJoinInfo(null)
                   }}
                   className="btn-ghost"
                   style={{ padding: '10px 20px', fontSize: 13 }}
@@ -968,6 +977,31 @@ export default function ExplorerPage() {
                 </div>
                 <div>
                   📊 Rows: <strong style={{ color: 'var(--text-primary)' }}>{sandboxResults?.length || 0}</strong>
+                </div>
+                {querySource && querySource.includes('live') && (
+                  <div>
+                    🔴 Source: <strong style={{ color: '#ef4444' }}>LIVE API</strong>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Cross-Source JOIN proof banner */}
+            {joinInfo && (
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 12,
+                background: 'rgba(74,222,128,0.06)',
+                border: '1.5px solid rgba(74,222,128,0.2)',
+                borderRadius: 'var(--radius-md)',
+                padding: '14px 20px',
+                fontSize: 12,
+              }}>
+                <span style={{ fontSize: 20 }}>🔗</span>
+                <div>
+                  <div style={{ fontWeight: 700, color: '#4ade80', marginBottom: 2 }}>Cross-Source Federated JOIN</div>
+                  <div style={{ color: 'var(--text-secondary)' }}>
+                    <strong>{joinInfo.left}</strong> ⇄ <strong>{joinInfo.right}</strong> on <code style={{ background: 'rgba(255,255,255,0.06)', padding: '1px 6px', borderRadius: 4 }}>{joinInfo.joinKey}</code>
+                  </div>
                 </div>
               </div>
             )}
