@@ -54,9 +54,8 @@ RUN apt-get update && \
 COPY --from=builder /root/.local/bin/coral /usr/local/bin/coral
 RUN chmod +x /usr/local/bin/coral
 
-# Copy Coral's config and data directories from the builder
+# Copy Coral's config directory from the builder (where source registry lives)
 COPY --from=builder /root/.config/ /root/.config/
-COPY --from=builder /root/.local/share/ /root/.local/share/
 
 # Verify Coral works during build
 RUN coral --version && coral source list
