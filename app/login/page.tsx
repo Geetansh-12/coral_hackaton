@@ -81,7 +81,7 @@ export default function LoginPage() {
   ]
 
   return (
-    <div style={{
+    <div className="login-container" style={{
       minHeight: '100vh',
       display: 'flex',
       background: '#0a0a08',
@@ -106,7 +106,7 @@ export default function LoginPage() {
       </div>
 
       {/* Left side — branding */}
-      <div style={{
+      <div className="branding-side" style={{
         flex: 1,
         display: 'flex',
         flexDirection: 'column',
@@ -199,7 +199,7 @@ export default function LoginPage() {
       </div>
 
       {/* Right side — auth form */}
-      <div style={{
+      <div className="auth-side" style={{
         width: 480,
         display: 'flex',
         flexDirection: 'column',
@@ -209,7 +209,7 @@ export default function LoginPage() {
         zIndex: 1,
       }}>
         {/* Glass card */}
-        <div style={{
+        <div className="auth-card" style={{
           background: 'rgba(255,255,255,0.03)',
           border: '1px solid rgba(255,255,255,0.08)',
           borderRadius: 20,
@@ -453,6 +453,25 @@ export default function LoginPage() {
         }
         input::placeholder {
           color: rgba(245,245,240,0.2);
+        }
+        @media (max-width: 768px) {
+          .login-container {
+            flex-direction: column !important;
+            overflow-y: auto !important;
+          }
+          .branding-side {
+            padding: 40px 24px !important;
+            flex: none !important;
+          }
+          .auth-side {
+            width: 100% !important;
+            padding: 20px 24px 60px !important;
+            align-items: center;
+          }
+          .auth-card {
+            width: 100% !important;
+            padding: 30px 20px !important;
+          }
         }
       `}</style>
     </div>
