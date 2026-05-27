@@ -297,6 +297,7 @@ function SourceCard({ source }: { source: DataSource }) {
             </button>
             <button onClick={testConnection} disabled={testingConnector} className="btn-ghost" style={{ padding: '10px 16px', fontSize: 13 }}>
               {testingConnector ? 'Testing...' : 'Test Connection'}
+            </button>
           </div>
 
           {connectionResult && (

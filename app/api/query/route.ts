@@ -43,9 +43,13 @@ export async function POST(request: Request) {
         
         const rows = JSON.parse(stdout.trim());
         return NextResponse.json({ rows, durationMs: Date.now() - start, cacheHit: false });
-      } catch (err) {
-        console.error('Real Coral CLI execution failed, falling back:', err);
-        // Fall back to mock if coral fails or binary is missing (e.g. Vercel)
+      } catch (err: any) {
+        console.error('Real Coral CLI execution failed:', err);
+        return NextResponse.json({ 
+          error: 'Coral CLI execution failed', 
+          details: err.message, 
+          stderr: err.stderr ? err.stderr.toString() : '' 
+        }, { status: 500 });
       }
     }
 
