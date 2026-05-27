@@ -56,8 +56,11 @@ export async function POST(request: Request) {
           if (token) headers['Authorization'] = `Bearer ${token}`;
 
           // ── CROSS-SOURCE JOIN: contacts JOIN github.users ──
-          if (cleanSql.includes('JOIN') && cleanSql.includes('GITHUB.USERS') && 
-              (cleanSql.includes('CONTACTS') || cleanSql.includes('CONTACT_RELATIONSHIP_GRAPH'))) {
+          const isJoin = cleanSql.includes('JOIN') && cleanSql.includes('GITHUB.USERS') && 
+              (cleanSql.includes('CONTACTS') || cleanSql.includes('CONTACT_RELATIONSHIP_GRAPH'));
+          console.log('[Query Router] isJoin:', isJoin, '| hasJOIN:', cleanSql.includes('JOIN'), '| hasCONTACTS:', cleanSql.includes('CONTACTS'), '| hasGITHUB.USERS:', cleanSql.includes('GITHUB.USERS'));
+          
+          if (isJoin) {
             
             // Step 1: Get contacts from local SQLite
             let contacts: any[] = [];
@@ -65,7 +68,6 @@ export async function POST(request: Request) {
               contacts = queryDb("SELECT name, email, company, role, github_username, health_score, days_since_contact FROM contacts WHERE github_username IS NOT NULL AND github_username != ''");
             } catch {
               // Fallback to mock data if SQLite not seeded
-              const { mockContacts } = require('@/lib/mock-data');
               contacts = mockContacts.filter((c: any) => c.github_username);
             }
 
